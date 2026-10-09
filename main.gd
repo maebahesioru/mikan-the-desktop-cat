@@ -8,7 +8,7 @@ const FALL_SPEED := 900.0  # gravity for dropping
 const PET_W := 96.0        # on-screen width of the pet
 const PET_H := 96.0
 
-enum State { WALK, IDLE, SLEEP, FALL, DRAG, HOP }
+enum State { WALK, IDLE, SLEEP, FALL, DRAG, HOP, PET }
 
 var state: State = State.WALK
 var dir := 1
@@ -18,6 +18,10 @@ var fall_vy := 0.0
 var drag_offset := Vector2.ZERO
 var hop_vy := 0.0
 var last_click_time := 0.0
+var press_pos := Vector2.ZERO
+var dragged := false
+var pet_time := 0.0
+var meow_player: AudioStreamPlayer
 var frames := {}
 var sprite: Sprite2D
 var win_size := Vector2(1920, 1080)
@@ -31,6 +35,14 @@ func _ready() -> void:
 		"sleep": [load("res://assets/sprites/sleep1.png"), load("res://assets/sprites/sleep2.png")],
 		"drag": [load("res://assets/sprites/drag.png")],
 	}
+	# procedural meow: a short gliding tone with vibrato
+	var stream := AudioStreamGenerator.new()
+	stream.mix_rate = 44100.0
+	stream.buffer_length = 0.6
+	meow_player = AudioStreamPlayer.new()
+	meow_player.stream = stream
+	add_child(meow_player)
+
 	sprite = Sprite2D.new()
 	sprite.texture = frames["idle"][0]
 	# scale the 128px art down a bit so she is not huge
@@ -72,13 +84,24 @@ func _input(event: InputEvent) -> void:
 					last_click_time = 0.0
 					return
 				last_click_time = now_t
+				press_pos = get_global_mouse_position()
+				dragged = false
 				state = State.DRAG
-				drag_offset = position - get_global_mouse_position()
+				drag_offset = position - press_pos
 				anim_time = 0.0
 		elif not event.pressed and state == State.DRAG:
-			# dropped — she falls to the floor
-			state = State.FALL
-			fall_vy = 0.0
+			if dragged:
+				# dropped — she falls to the floor
+				state = State.FALL
+				fall_vy = 0.0
+			else:
+				# it was a tap = a pet! she melts and meows
+				state = State.PET
+				pet_time = 0.9
+				_play_meow()
+	if event is InputEventMouseMotion and state == State.DRAG:
+		if get_global_mouse_position().distance_to(press_pos) > 6.0:
+			dragged = true
 
 
 func _process(delta: float) -> void:
@@ -131,6 +154,13 @@ func _process(delta: float) -> void:
 				position.y = floor_y
 				state = State.IDLE
 				state_time = randf_range(0.8, 1.6)
+		State.PET:
+			sprite.texture = frames["idle"][int(anim_time * 3.0) % 2]
+			sprite.flip_h = false
+			pet_time -= delta
+			if pet_time <= 0.0:
+				state = State.WALK
+				state_time = randf_range(2.5, 6.0)
 		State.DRAG:
 			position = get_global_mouse_position() + drag_offset
 			# keep her on screen while held
@@ -139,3 +169,22 @@ func _process(delta: float) -> void:
 			sprite.texture = frames["drag"][0]
 			sprite.flip_h = false
 	_update_passthrough()
+
+
+func _play_meow() -> void:
+	"""Synthesize a tiny 'mrrp!' — a rising-falling glide with vibrato."""
+	meow_player.play()
+	var pb := meow_player.get_stream_playback() as AudioStreamGeneratorPlayback
+	if pb == null:
+		return
+	var rate := 44100.0
+	var n := int(rate * 0.35)
+	for i in range(n):
+		var t := float(i) / rate
+		# base pitch: 520 Hz rising to 780 then falling to 430
+		var f: float = 520.0 + 260.0 * sin(PI * clampf(t / 0.35, 0.0, 1.0))
+		f += 18.0 * sin(2.0 * PI * 28.0 * t)  # vibrato
+		var env: float = clampf(1.0 - t / 0.35, 0.0, 1.0)
+		env = pow(env, 0.7) as float
+		var sample: float = sin(TAU * f * t) * 0.25 * env
+		pb.push_frame(Vector2(sample, sample))

@@ -44,6 +44,8 @@ Made by maebahesioru for Hack Club Playground (October 2026).
 
 ## Changelog
 
+- **v1.0.2** — tap her (a quick click) and she melts, wags, and says "mrrp!" — a tiny
+  procedurally-synthesized meow. Drag still picks her up. 🎵
 - **v1.0.1** — double-click her and she does a happy little hop! 🐱
 - **v1.0.0** — first release: walk / idle / sleep / drag states, click-through window,
   Windows + Linux exports, itch.io release.
