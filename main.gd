@@ -8,7 +8,7 @@ const FALL_SPEED := 900.0  # gravity for dropping
 const PET_W := 96.0        # on-screen width of the pet
 const PET_H := 96.0
 
-enum State { WALK, IDLE, SLEEP, FALL, DRAG }
+enum State { WALK, IDLE, SLEEP, FALL, DRAG, HOP }
 
 var state: State = State.WALK
 var dir := 1
@@ -16,6 +16,8 @@ var state_time := 0.0
 var anim_time := 0.0
 var fall_vy := 0.0
 var drag_offset := Vector2.ZERO
+var hop_vy := 0.0
+var last_click_time := 0.0
 var frames := {}
 var sprite: Sprite2D
 var win_size := Vector2(1920, 1080)
@@ -61,6 +63,15 @@ func _input(event: InputEvent) -> void:
 			# only react if the click is on the cat
 			var local := get_local_mouse_position()
 			if abs(local.x) < PET_W * 0.5 and abs(local.y) < PET_H * 0.5:
+				# double-click = she hops!
+				var now_t := Time.get_ticks_msec() / 1000.0
+				if now_t - last_click_time < 0.35 and state != State.HOP:
+					state = State.HOP
+					hop_vy = -620.0
+					anim_time = 0.0
+					last_click_time = 0.0
+					return
+				last_click_time = now_t
 				state = State.DRAG
 				drag_offset = position - get_global_mouse_position()
 				anim_time = 0.0
@@ -111,6 +122,15 @@ func _process(delta: float) -> void:
 				position.y = floor_y
 				state = State.WALK
 				state_time = randf_range(2.0, 5.0)
+		State.HOP:
+			hop_vy += FALL_SPEED * 1.4 * delta
+			position.y += hop_vy * delta
+			sprite.texture = frames["drag"][0]
+			sprite.flip_h = false
+			if position.y >= floor_y:
+				position.y = floor_y
+				state = State.IDLE
+				state_time = randf_range(0.8, 1.6)
 		State.DRAG:
 			position = get_global_mouse_position() + drag_offset
 			# keep her on screen while held
