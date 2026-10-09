@@ -39,3 +39,10 @@ Or download the exported build for your OS from the releases / itch.io page.
 ## Credits
 
 Made by maebahesioru for Hack Club Playground (October 2026).
+
+---
+
+## Changelog
+
+- **v1.0.0** — first release: walk / idle / sleep / drag states, click-through window,
+  Windows + Linux exports, itch.io release.
