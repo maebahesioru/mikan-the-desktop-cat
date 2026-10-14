@@ -6,6 +6,7 @@ A tiny orange cat who lives on your desktop. 🐱
 
 - **Walks** left and right along the bottom of your screen, turning around at the edges
 - **Rests** when she feels like it, and **falls asleep** (with little z's) if you leave her alone
+- **Watches you** — she sometimes turns to face your cursor when she sits down
 - **Loves being picked up** — grab her with the mouse, carry her anywhere, and drop her:
   she falls gently back down to the floor and keeps exploring
 - **Never gets in your way** — only the cat herself catches your clicks.
@@ -14,8 +15,11 @@ A tiny orange cat who lives on your desktop. 🐱
 ## Controls
 
 - **Drag** her with the mouse to pick her up and carry her around
-- **Drop** her and let gravity do the rest
-- That's it! She's a cat, not a productivity tool 🧡
+- **Tap** her for a little "mrrp!" (and she counts it — see the menu)
+- **Double-click** her and she does a happy hop
+- **Right-click** her for her menu: *come here!* (she follows your cursor),
+  *nap/wake*, *roam* toggle, *small/normal/big* sizes, and a *pets today* counter.
+  She remembers your settings between launches.
 
 ## Made with
 

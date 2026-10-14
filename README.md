@@ -11,19 +11,34 @@ Built with **Godot 4.4** for [Hack Club Playground](https://playground.hackclub.
 - **Walks** left and right along the bottom of your screen, turning around at the edges
 - **Idles** — sits and breathes (2-frame idle animation)
 - **Naps** — after a while she curls up and sleeps with little `z`s
+- **Watches you** — when she settles down, she sometimes turns to face your cursor
 - **Drag & drop** — pick her up with the mouse (she looks surprised!), carry her
   anywhere, and drop her: she falls back down to the floor
 - **Click-through** — only the cat herself catches mouse clicks; everything else
   passes through to your desktop, so she never blocks your work
 
+## Her little menu
+
+**Right-click her** for:
+
+- **come here!** — she'll trot after your cursor for a few seconds
+- **nap time / wake up** — put her to bed, or gently wake her
+- **roam around** — toggle her wandering on/off (she'll stay put if you turn it off)
+- **small / normal / big** — pick her size
+- **pets today: N** — a little counter of how many times you've pet her today
+
+Her size, roam setting, and the pet counter are saved between launches
+(`user://mikan.cfg`), so she remembers you.
+
 ## How it works (technical)
 
-- `main.gd` — a small state machine (`WALK / IDLE / SLEEP / FALL / DRAG`)
+- `main.gd` — a small state machine
+  (`WALK / IDLE / SLEEP / FALL / DRAG / HOP / PET / COME`)
 - Transparent, borderless, always-on-top window (`project.godot`):
   `window/size/transparent=true`, `borderless=true`, `always_on_top=true`
 - **Mouse passthrough** is updated every frame with
   `DisplayServer.window_set_mouse_passthrough(poly)` so only the cat's rectangle
-  receives clicks
+  (and her menu, while it's open) receives clicks
 - Sprites are generated pixel art (32×32 at 4× scale), drawn procedurally —
   see `make_sprites.py`
 
@@ -44,6 +59,9 @@ Made by maebahesioru for Hack Club Playground (October 2026).
 
 ## Changelog
 
+- **v1.1.0** — right-click menu: *come here!* (she follows your cursor), *nap/wake*,
+  *roam* toggle, *small/normal/big* sizes, and a *pets today* counter. Settings are
+  saved between launches, and she now sometimes turns to watch your cursor. 🧡
 - **v1.0.2** — tap her (a quick click) and she melts, wags, and says "mrrp!" — a tiny
   procedurally-synthesized meow. Drag still picks her up. 🎵
 - **v1.0.1** — double-click her and she does a happy little hop! 🐱
